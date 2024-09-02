@@ -1,0 +1,59 @@
+<!doctype html>
+
+<head>
+    <title>Resume</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+    <script src="static/scripts/script.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="static/styles/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap"
+        rel="stylesheet"
+    />
+    <meta
+        name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1"
+    />
+</head>
+
+<body>
+    <header>
+        <h2
+            hx-get="api/title"
+            hx-vals="js:{title: event.target.innerText}"
+            style="text-align: center"
+        >
+            Drew Taylor
+        </h2>
+        <h4>Software Engineer - Deloitte Consulting LLP</h4>
+        <h4>
+            <a
+                href="https://www.linkedin.com/in/drew-taylor-90b188176/"
+                target="_blank"
+                >LinkedIn</a
+            >
+            •
+            <a href="https://github.com/dtaylor0/" target="_blank">GitHub</a> •
+            <a href="mailto:drewtaylorm@gmail.com" target="_blank"
+                >Send email</a
+            >
+        </h4>
+    </header>
+    <div class="center-content" hx-ext="ws" ws-connect="/api/ws">
+        <div id="chat" class="chat-container"></div>
+        <div class="chat-message chat-field">
+            <form id="chat-form" class="chat-item" ws-send>
+                <textarea
+                    id="prompt-input"
+                    inputmode="text"
+                    type="text"
+                    name="prompt"
+                    autofocus
+                ></textarea>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+</body>

@@ -1,0 +1,136 @@
+:root {
+    --accent: #2c738a;
+    --dark: #ddd;
+    --light: #eee;
+}
+
+.center-content {
+    background: var(--dark);
+    width: 90vw;
+    margin: auto;
+    line-height: 1.2;
+    height: 60vh;
+}
+
+@media (min-width: 1200px) {
+    .center-content {
+        width: 40vw;
+    }
+
+    body {
+        font-size: 0.4rem;
+    }
+
+    form {
+        height: 12vh;
+    }
+
+    .chat-item {
+        border-radius: 2rem;
+        margin: 0.4rem;
+        padding: 0.6rem;
+    }
+}
+
+header {
+    background: var(--dark);
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    margin: 1rem 0;
+    max-height: 10vh;
+}
+
+header * {
+    margin: 0.1rem;
+    text-align: center;
+}
+
+body {
+    background: var(--dark);
+    color: black;
+    margin: 0px;
+    font-family: sans-serif;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+}
+
+a {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+.chat-container {
+    overflow-y: scroll;
+    scrollbar-color: var(--dark) var(--dark);
+    scrollbar-gutter: stable both-edges;
+    max-height: 100%;
+}
+
+.chat-item {
+    border-radius: 3rem;
+    margin: 1rem;
+    padding: 1.4rem;
+    display: flex;
+}
+
+.chat-container .chat-message * {
+    margin: 0;
+    padding: 0;
+    line-break: auto;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.chat-container .bot {
+    text-align: left;
+    background: var(--light);
+}
+
+.chat-container .user {
+    text-align: right;
+    background: var(--accent);
+    color: white;
+}
+
+.chat-field {
+    min-height: 10vh;
+}
+
+textarea {
+    all: unset;
+    width: 100%;
+    background-color: var(--accent);
+    color: white;
+    overflow-y: scroll;
+    word-break: break-word;
+    scrollbar-color: var(--accent) var(--accent);
+}
+
+form {
+    width: auto;
+    overflow: hidden;
+    background-color: var(--accent);
+    height: 7vh;
+}
+
+input {
+    width: 100vw;
+}
+span {
+    overflow: hidden;
+    margin: 0.5rem;
+    width: 100%;
+}
+button {
+    display: flex;
+    all: unset;
+    float: center;
+    height: 2em;
+    background: var(--light);
+    border-radius: 15px;
+    padding: 0.5em;
+    margin: auto;
+}

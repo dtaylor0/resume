@@ -1,0 +1,33 @@
+services:
+  webapp:
+    build: ./src/
+    ports:
+      - "80:80"
+    networks:
+      - public
+      - private
+    env_file: "./src/.env"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./src/server.go
+          target: /code
+        - action: sync
+          path: ./src/public
+          target: /code/public
+        - action: sync
+          path: ./src/views
+          target: /code/views
+  llmservice:
+    build: ./llm/
+    networks:
+      - private
+      - outbound
+    env_file: "./llm/.env"
+
+networks:
+  public:
+  private:
+    internal: true
+  outbound:
+    driver: bridge
