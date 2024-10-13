@@ -1,13 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import ChatMessage from "./ChatMessage";
 
 function Chat() {
+    const [messages, setMessages] = useState([]);
     const ws = useRef(null);
 
     useEffect(() => {
-        ws.current = new WebSocket("/api/chat");
+        ws.current = new WebSocket("/api/ws");
         ws.current.onmessage = (event) => {
             const json = JSON.parse(event.data);
             console.log(json);
+            setMessages((ms) => [...ms, json.response]);
         };
         return () => {
             if (ws.current) {
@@ -15,9 +18,11 @@ function Chat() {
             }
         };
     }, []);
+
     return (
         <div id="chat" className="chat-container">
             <div className="chat-message chat-field">
+                {messages.map((msg, i) => ChatMessage(msg, i))}
                 <form
                     id="chat-form"
                     className="chat-item"
@@ -27,10 +32,18 @@ function Chat() {
                             ws.current &&
                             ws.current.readyState === WebSocket.OPEN
                         ) {
-                            const message =
-                                document.getElementById("prompt-input").value;
-                            ws.current.send(JSON.stringify({ message }));
-                            document.getElementById("prompt-input").value = "";
+                            const promptInput =
+                                document.getElementById("prompt-input");
+                            const prompt = promptInput.value;
+
+                            ws.current.send(
+                                JSON.stringify({
+                                    prompt: [...messages, prompt].join("\n\n"),
+                                }),
+                            );
+
+                            setMessages((msgs) => [...msgs, prompt]);
+                            promptInput.value = "";
                         } else {
                             console.log("WebSocket is not connected");
                         }
