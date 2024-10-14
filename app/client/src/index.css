@@ -10,6 +10,13 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    --accent: #2c738a;
+    --neutral: #444;
+    --bgcolor: #333;
+
+    color: white;
+    background-color: var(--bgcolor);
 }
 
 #root {

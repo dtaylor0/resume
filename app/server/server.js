@@ -9,18 +9,25 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import { configDotenv } from "dotenv";
 
 configDotenv();
-const express = require("express");
+import express from "express";
+import path from "node:path";
 const port = 8080;
 
 const llm = new ChatOpenAI({ model: "gpt-4o-mini" });
 const vectorStore = await FaissStore.load("./data/", new OpenAIEmbeddings());
 
 const retriever = vectorStore.asRetriever({
-    searchKwargs: { fetchK: 7 },
+    searchKwargs: { fetchK: 20 },
 });
 
 const prompt =
-    PromptTemplate.fromTemplate(`Answer the question based only on the following context:
+    PromptTemplate.fromTemplate(`Your job is to answer questions about Drew's
+    resume for potential employers. Understand the context and then provide
+    the relevant answer to the question. You will not answer questions which
+    are unrelated to the resume, and you will not give specific estimates on
+    time, age, or any similar topic. You will also reformat all your
+    responses into well-formatted plaintext and no markdown. Additionally,
+    you will not quote anything directly from the resume.
 
 {context}
 
@@ -43,12 +50,7 @@ const ragChain = RunnableSequence.from([
 const app = express();
 require("express-ws")(app);
 
-/* app.get("/api/llm", function (req, res, _next) {
-    ragChain
-        .invoke(req.query.prompt)
-        .then(res.send({ response: llmRes }))
-        .catch((err) => console.log(err));
-}); */
+app.use(express.static(path.join(__dirname, "../../client/dist")));
 
 app.ws("/api/ws", function (ws, _req) {
     ws.on("error", console.error);
@@ -64,7 +66,10 @@ app.ws("/api/ws", function (ws, _req) {
             .then((llmRes) => ws.send(JSON.stringify({ response: llmRes })))
             .catch((err) => console.log(err));
     });
-    // ws.send(JSON.stringify({ message: "something" }));
+});
+
+app.get("*", (_req, res) => {
+    res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
 });
 
 app.listen(port, () => {

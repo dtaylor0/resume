@@ -1,0 +1,28 @@
+{
+    "name": "server",
+    "module": "server.js",
+    "type": "module",
+    "devDependencies": {
+        "@types/bun": "latest",
+        "vite": "^5.4.8"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@langchain/community": "^0.3.4",
+        "@langchain/core": "^0.3.8",
+        "@langchain/openai": "^0.3.5",
+        "bindings": "^1.5.0",
+        "dotenv": "^16.4.5",
+        "express": "^4.21.1",
+        "express-ws": "^5.0.2",
+        "faiss-node": "^0.5.1",
+        "node-addon-api": "^8.2.1",
+        "prebuild-install": "^7.1.2"
+    },
+    "trustedDependencies": [
+        "esbuild",
+        "faiss-node"
+    ]
+}
