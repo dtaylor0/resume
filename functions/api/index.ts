@@ -32,7 +32,8 @@ app.get(
           ws.send(JSON.stringify({ response: "Womp" }));
           return;
         }
-        createRagChain(c.env.VECTORIZE, c.env.AI)
+        ws.send(JSON.stringify({ response: "Hello" }));
+        /* createRagChain(c.env.VECTORIZE, c.env.AI)
           .then((r: RunnableSequence) => {
             r.invoke(wsReq.prompt).then((llmRes) =>
               ws.send(JSON.stringify({ response: llmRes })),
@@ -40,7 +41,7 @@ app.get(
           })
           .catch((err: Error) => {
             throw err;
-          });
+          }); */
       },
       onClose: () => {
         console.log("Connection closed.");
