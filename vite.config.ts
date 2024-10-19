@@ -7,11 +7,11 @@ export default defineConfig({
   esbuild: {
     platform: "node",
   },
-  build: {
+  /* build: {
     rollupOptions: {
       external: ["@langchain/cloudflare"],
     },
-  },
+  }, */
   plugins: [
     react(),
     devServer({ entry: "src/main.jsx" }),
