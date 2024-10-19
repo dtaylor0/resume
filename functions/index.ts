@@ -21,7 +21,7 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.get(
-  "/ws",
+  "/api/ws",
   upgradeWebSocket((c) => {
     return {
       onMessage(event, ws) {
@@ -50,12 +50,12 @@ app.get(
   }),
 );
 
-app.get("/", (c) => {
+app.get("/api", (c) => {
   return c.json({ response: "hello from api" });
 });
 
 app.post(
-  "/resume",
+  "/api/resume",
   async (c, next) => {
     const auth = basicAuth({
       username: c.env.USERNAME,
