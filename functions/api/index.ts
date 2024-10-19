@@ -20,10 +20,8 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.use("/", serveStatic({ root: "../dist/", manifest: {} }));
-
 app.get(
-  "/api/ws",
+  "/ws",
   upgradeWebSocket((c) => {
     return {
       onMessage(event, ws) {
@@ -52,7 +50,7 @@ app.get(
 );
 
 app.post(
-  "/api/resume",
+  "/resume",
   async (c, next) => {
     const auth = basicAuth({
       username: c.env.USERNAME,
@@ -110,4 +108,6 @@ async function refreshVectorize(
   await store.addDocuments(splits);
 }
 
-export default app;
+// export default app;
+
+export const onRequest = app.fetch;
