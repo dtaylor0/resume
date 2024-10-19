@@ -4,9 +4,9 @@ import devServer from "@hono/vite-dev-server";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  esbuild: {
-    platform: "node",
-  },
+  // esbuild: {
+  //   platform: "node",
+  // },
   /* build: {
     rollupOptions: {
       external: ["@langchain/cloudflare"],
@@ -14,7 +14,7 @@ export default defineConfig({
   }, */
   plugins: [
     react(),
-    devServer({ entry: "src/main.jsx" }),
+    // devServer({ entry: "src/main.jsx" }),
     // cloudflarePagesPlugin(),
   ],
 });
