@@ -49,6 +49,10 @@ app.get(
   }),
 );
 
+app.get("/", (c) => {
+  return c.json({ response: "hello from api" });
+});
+
 app.post(
   "/resume",
   async (c, next) => {
