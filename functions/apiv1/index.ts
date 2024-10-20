@@ -21,12 +21,12 @@ const app = new Hono<{ Bindings: Bindings }>();
 // const app = new Hono();
 
 app.get("/apiv1/ws", (c) => {
-  if (c.req.header("Upgrade") !== "websocket") {
+  const upgradeHeader = c.req.header("Upgrade");
+  if (!upgradeHeader || upgradeHeader !== "websocket") {
     return c.text("Expected Upgrade: websocket", 400);
   }
 
-  const pair = new WebSocketPair();
-  const [client, server] = Object.values(pair);
+  const { 0: client, 1: server } = new WebSocketPair();
 
   server.accept();
 
