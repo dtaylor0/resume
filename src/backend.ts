@@ -20,6 +20,9 @@ app.get('/apiv1/hello', (c) => {
 app.get(
     '/apiv1/ws',
     upgradeWebSocket((c) => {
+        c.header('Access-Control-Allow-Origin', '*');
+        c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        c.header('Access-Control-Allow-Headers', 'Content-Type');
         return {
             onMessage(event, ws) {
                 console.log(`Message from client: ${event.data}`);
@@ -29,15 +32,22 @@ app.get(
                         console.log('No prompt found.');
                         ws.send(JSON.stringify({ response: 'No prompt provided' }));
                     } else {
-                        ws.send(JSON.stringify({ response: 'Hello' }));
-                        // createRagChain(c.env.VECTORIZE, c.env.AI)
-                        //     .then((r: RunnableSequence) => {
-                        //         r.invoke(wsReq.prompt).then((llmRes) => ws.send(JSON.stringify({ response: llmRes })));
-                        //     })
-                        //     .catch((err: Error) => {
-                        //         console.error('Error in createRagChain:', err);
-                        //         ws.send(JSON.stringify({ response: 'Internal server error' }));
-                        //     });
+                        // ws.send(JSON.stringify({ response: 'Hello' }));
+                        createRagChain(c.env.VECTORIZE, c.env.AI, c.env.CF_ACCOUNT_ID, c.env.CF_ACCOUNT_TOKEN)
+                            .then((r: RunnableSequence) => {
+                                r.invoke(wsReq.prompt)
+                                    .then((llmRes) => ws.send(JSON.stringify({ response: llmRes })))
+                                    .catch((e) => {
+                                        const msg = JSON.stringify({ response: `invoke failure: ${e.message || 'unknown error'}` });
+                                        console.log(msg);
+                                        ws.send(msg);
+                                    });
+                            })
+                            .catch((err: Error) => {
+                                const msg = JSON.stringify({ response: err.message });
+                                console.error(msg);
+                                ws.send(msg);
+                            });
                     }
                 } catch (error) {
                     console.error('Error in WebSocket handler:', error);
