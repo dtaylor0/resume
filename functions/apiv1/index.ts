@@ -20,13 +20,15 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 // const app = new Hono();
 
-app.get("/apiv1/ws", (c) => {
+app.get("/apiv1/ws", async (c) => {
   const upgradeHeader = c.req.header("Upgrade");
   if (!upgradeHeader || upgradeHeader !== "websocket") {
-    return c.text("Expected Upgrade: websocket", 400);
+    return c.text("Expected Upgrade: websocket", 426);
   }
 
-  const { 0: client, 1: server } = new WebSocketPair();
+  const webSocketPair = new WebSocketPair();
+  const client = webSocketPair[0],
+    server = webSocketPair[1];
 
   server.accept();
 
