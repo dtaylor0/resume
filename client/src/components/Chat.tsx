@@ -8,7 +8,7 @@ function Chat() {
 
 	const ws: MutableRefObject<WebSocket | null> = useRef(null);
 	useEffect(() => {
-		ws.current = new WebSocket('/apiv1/ws', 'ws');
+		ws.current = new WebSocket('/apiv1/ws');
 		ws.current.onmessage = (event) => {
 			const json = JSON.parse(event.data);
 			console.log(json);

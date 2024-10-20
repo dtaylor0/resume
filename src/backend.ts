@@ -1,16 +1,11 @@
 import { Hono } from 'hono';
-// import { serveStatic } from "hono/cloudflare-workers";
 import { upgradeWebSocket } from 'hono/cloudflare-workers';
 import { CloudflareVectorizeStore, CloudflareWorkersAIEmbeddings } from '@langchain/cloudflare';
 import { MarkdownTextSplitter } from 'langchain/text_splitter';
-// import createRagChain from './llm.js';
+import createRagChain from './llm.js';
 // import { basicAuth } from "hono/basic-auth";
 import { Document } from '@langchain/core/documents';
-// import { RunnableSequence } from '@langchain/core/runnables';
-
-// import { createBunWebSocket } from 'hono/bun';
-//
-// const { upgradeWebSocket, websocket } = createBunWebSocket();
+import { RunnableSequence } from '@langchain/core/runnables';
 
 type Bindings = {
 	AI: any;
@@ -21,60 +16,72 @@ const app = new Hono<{ Bindings: Bindings }>();
 // const app = new Hono();
 
 app.get(
-	'/apiv1/ws',
-	upgradeWebSocket((_c) => {
-		// const upgradeHeader = c.req.header('Upgrade');
-		// if (!upgradeHeader || upgradeHeader !== 'websocket') {
-		// 	return c.text('Expected Upgrade: websocket', 426);
-		// }
-		//
-		// const webSocketPair = new WebSocketPair();
-		// const client = webSocketPair[0],
-		// 	server = webSocketPair[1];
-		//
-		// server.accept();
-		//
-		// const upgradeResponse = new Response(null, {
-		// 	status: 101,
-		// 	webSocket: client,
-		// });
-		return {
-			onMessage(event, ws) {
-				console.log(`Message from client: ${event.data}`);
-				ws.send('Hello from server!');
-			},
-			onClose: () => {
-				console.log('Connection closed');
-			},
-			// server.addEventListener('message', (event) => {
-			// 	console.log('Received: %s', event.data);
-			// 	try {
-			// 		const wsReq = JSON.parse(event.data as string);
-			// 		if (!wsReq || !wsReq.prompt) {
-			// 			console.log('No prompt found.');
-			// 			server.send(JSON.stringify({ error: 'No prompt provided' }));
-			// 		} else {
-			// 			server.send(JSON.stringify({ response: 'Hello' }));
-			// 		}
-			// 		// createRagChain(c.env.VECTORIZE, c.env.AI)
-			// 		// 	.then((r: RunnableSequence) => {
-			// 		// 		r.invoke(wsReq.prompt).then((llmRes) => server.send(JSON.stringify({ response: llmRes })));
-			// 		// 	})
-			// 		// 	.catch((err: Error) => {
-			// 		// 		console.error('Error in createRagChain:', err);
-			// 		// 		server.send(JSON.stringify({ error: 'Internal server error' }));
-			// 		// 	});
-			// 	} catch (error) {
-			// 		console.error('Error in WebSocket handler:', error);
-			// 		server.send(JSON.stringify({ error: 'Internal server error' }));
+	'/apiv1/womp',
+	// upgradeWebSocket(
+	(c) => {
+		const upgradeHeader = c.req.header('Upgrade');
+		if (!upgradeHeader || upgradeHeader !== 'websocket') {
+			return c.text('Expected Upgrade: websocket', 426);
+		}
+
+		const webSocketPair = new WebSocketPair();
+		const client = webSocketPair[0],
+			server = webSocketPair[1];
+
+		server.accept();
+
+		// return {
+		// onMessage(event, ws) {
+		// 	console.log(`Message from client: ${event.data}`);
+		// 	ws.send('Hello from server!');
+		// },
+		// onClose: () => {
+		// 	console.log('Connection closed');
+		// },
+		server.addEventListener('message', (event) => {
+			// console.log('Received: %s', event.data);
+			server.send('Hello there');
+			// try {
+			// 	const wsReq = JSON.parse(event.data as string);
+			// 	if (!wsReq || !wsReq.prompt) {
+			// 		console.log('No prompt found.');
+			// 		server.send(JSON.stringify({ error: 'No prompt provided' }));
+			// 	} else {
+			// 		server.send(JSON.stringify({ response: 'Hello' }));
 			// 	}
-			// });
-			// server.addEventListener('close', (_event) => {
-			// 	console.log('WebSocket closed');
-			// });
-			// return upgradeResponse;
-		};
-	}),
+			// 	// createRagChain(c.env.VECTORIZE, c.env.AI)
+			// 	// 	.then((r: RunnableSequence) => {
+			// 	// 		r.invoke(wsReq.prompt).then((llmRes) => server.send(JSON.stringify({ response: llmRes })));
+			// 	// 	})
+			// 	// 	.catch((err: Error) => {
+			// 	// 		console.error('Error in createRagChain:', err);
+			// 	// 		server.send(JSON.stringify({ error: 'Internal server error' }));
+			// 	// 	});
+			// } catch (error) {
+			// 	console.error('Error in WebSocket handler:', error);
+			// 	server.send(JSON.stringify({ error: 'Internal server error' }));
+			// }
+		});
+
+		server.addEventListener('close', (event) => {
+			console.log('WebSocket closed:', event.code, event.reason);
+		});
+
+		const timeout = setTimeout(() => {
+			server.close(1000, 'Connection timeout');
+		}, 60000);
+
+		server.addEventListener('close', () => {
+			clearTimeout(timeout);
+		});
+
+		return new Response(null, {
+			status: 101,
+			webSocket: client,
+		});
+		// };
+	},
+	// ),
 );
 // return {
 //   onMessage(event, ws) {
@@ -109,9 +116,44 @@ app.get(
 // };
 // });
 
-app.get('/apiv1', (c) => {
+app.get('/apiv1/hello', (c) => {
 	return c.json({ response: 'hello from api' });
 });
+
+app.get(
+	'/apiv1/ws',
+	upgradeWebSocket((c) => {
+		return {
+			onMessage(event, ws) {
+				console.log(`Message from client: ${event.data}`);
+				// ws.send(JSON.stringify({ response: 'Hello from server!' }));
+				try {
+					const wsReq = JSON.parse(event.data as string);
+					if (!wsReq || !wsReq.prompt) {
+						console.log('No prompt found.');
+						ws.send(JSON.stringify({ response: 'No prompt provided' }));
+					} else {
+						// ws.send(JSON.stringify({ response: 'Hello' }));
+						createRagChain(c.env.VECTORIZE, c.env.AI)
+							.then((r: RunnableSequence) => {
+								r.invoke(wsReq.prompt).then((llmRes) => ws.send(JSON.stringify({ response: llmRes })));
+							})
+							.catch((err: Error) => {
+								console.error('Error in createRagChain:', err);
+								ws.send(JSON.stringify({ response: 'Internal server error' }));
+							});
+					}
+				} catch (error) {
+					console.error('Error in WebSocket handler:', error);
+					ws.send(JSON.stringify({ response: 'Internal server error' }));
+				}
+			},
+			onClose: () => {
+				console.log('Connection closed');
+			},
+		};
+	}),
+);
 
 app.post(
 	'/apiv1/resume',
@@ -170,7 +212,7 @@ async function refreshVectorize(contents: string, vect: VectorizeIndex, ai: Bind
 
 // export default app;
 
-export default { fetch: app.fetch };
+export default app;
 /* export function onRequest(context: any) {
   return new Response("Hello, World");
 } */
