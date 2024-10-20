@@ -1,0 +1,12 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "my-resume"
+main = "src/backend.ts"
+compatibility_date = "2024-10-18"
+compatibility_flags = ["nodejs_compat"]
+assets = { directory = "./client/dist/", binding = "ASSETS" }
+
+# Workers Logs
+# Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
+# Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
+[observability]
+enabled = true
