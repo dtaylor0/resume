@@ -13,7 +13,7 @@ export default async function createRagChain(
     cfApiToken: string,
 ): Promise<RunnableSequence<any, string>> {
     const llm = new CloudflareWorkersAI({
-        model: '@cf/meta/llama-3.1-8b-instruct',
+        model: '@cf/meta/llama-3.1-8b-instruct-fast',
         cloudflareAccountId: cfAcctId,
         cloudflareApiToken: cfApiToken,
     });
@@ -33,9 +33,9 @@ export default async function createRagChain(
     resume for potential employers. Understand the context and then provide
     the relevant answer to the question. You will not answer questions which
     are unrelated to the resume, and you will not give specific estimates on
-    time, age, or any similar topic. You will also reformat all your
-    responses into well-formatted plaintext and no markdown. Additionally,
-    you will not quote anything directly from the resume.
+    time, age, or any similar topic. You will not give answers that are not
+    directly pulled from the resume. You will also reformat all your
+    responses into well-formatted plaintext and no markdown.
 
 {context}
 

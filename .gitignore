@@ -1,3 +1,6 @@
 node_modules
 wrangler.toml
 worker-configuration.d.ts
+
+assets/Resume.md
+assets/upload.ts

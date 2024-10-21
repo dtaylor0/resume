@@ -33,7 +33,7 @@ app.get(
                         ws.send(JSON.stringify({ response: 'No prompt provided' }));
                     } else {
                         // ws.send(JSON.stringify({ response: 'Hello' }));
-                        createRagChain(c.env.VECTORIZE, c.env.AI, c.env.CF_ACCOUNT_ID, c.env.CF_ACCOUNT_TOKEN)
+                        createRagChain(c.env.VECTORIZE, c.env.AI, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN)
                             .then((r: RunnableSequence) => {
                                 r.invoke(wsReq.prompt)
                                     .then((llmRes) => ws.send(JSON.stringify({ response: llmRes })))
@@ -63,7 +63,7 @@ app.get(
 
 app.post('/apiv1/resume', async (c) => {
     const resume = await c.req.json();
-    const ok = refreshVectorize(resume.contents, c.env.VECTORIZE, c.env.AI);
+    const ok = await refreshVectorize(resume.contents, c.env.VECTORIZE, c.env.AI);
     return c.json({ ok });
 });
 
@@ -94,6 +94,13 @@ async function refreshVectorize(contents: string, vect: VectorizeIndex, ai: Bind
     const docs = createDocuments(contents, 600);
     const md_splitter = new MarkdownTextSplitter({ chunkSize: 600 });
     const splits = await md_splitter.splitDocuments(docs);
+    for (let i = 0; i < splits.length; i++) {
+        for (const [k, v] of Object.entries(splits[i])) {
+            if (typeof v === 'object') {
+                splits[i][k] = JSON.stringify(v);
+            }
+        }
+    }
 
     const embeddings = new CloudflareWorkersAIEmbeddings({
         binding: ai,
