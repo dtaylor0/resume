@@ -3,6 +3,8 @@
 This website uses vector embeddings of my resume content to answer natural
 language questions about my work experience.
 
+[Resume Website](https://drtaylor.xyz)
+
 ## Architecture
 
 The website was previously built using a Go web server, a Python backend
