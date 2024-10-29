@@ -13,7 +13,7 @@ export default async function createRagChain(
     cfApiToken: string,
 ): Promise<RunnableSequence<any, string>> {
     const llm = new CloudflareWorkersAI({
-        model: '@cf/meta/llama-3.1-8b-instruct-fast',
+        model: '@cf/meta/llama-3.1-70b-instruct',
         cloudflareAccountId: cfAcctId,
         cloudflareApiToken: cfApiToken,
     });
@@ -26,7 +26,7 @@ export default async function createRagChain(
     });
 
     const retriever = vectorStore.asRetriever({
-        searchKwargs: { fetchK: 10 },
+        searchKwargs: { fetchK: 20 },
     });
 
     const prompt = PromptTemplate.fromTemplate(`Your job is to answer questions about Drew's

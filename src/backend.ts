@@ -20,9 +20,6 @@ app.get('/apiv1/hello', (c) => {
 app.get(
     '/apiv1/ws',
     upgradeWebSocket((c) => {
-        c.header('Access-Control-Allow-Origin', '*');
-        c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        c.header('Access-Control-Allow-Headers', 'Content-Type');
         return {
             onMessage(event, ws) {
                 console.log(`Message from client: ${event.data}`);
@@ -32,11 +29,10 @@ app.get(
                         console.log('No prompt found.');
                         ws.send(JSON.stringify({ response: 'No prompt provided' }));
                     } else {
-                        // ws.send(JSON.stringify({ response: 'Hello' }));
                         createRagChain(c.env.VECTORIZE, c.env.AI, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN)
                             .then((r: RunnableSequence) => {
-                                r.invoke(wsReq.prompt)
-                                    .then((llmRes) => ws.send(JSON.stringify({ response: llmRes })))
+                                r.invoke(JSON.stringify(wsReq.prompt))
+                                    .then((response) => ws.send(JSON.stringify({ response })))
                                     .catch((e) => {
                                         const msg = JSON.stringify({ response: `invoke failure: ${e.message || 'unknown error'}` });
                                         console.log(msg);
