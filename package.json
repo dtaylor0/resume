@@ -1,26 +1,31 @@
 {
-	"name": "my-resume",
-	"version": "0.0.0",
-	"type": "module",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"build": "cd client && bun i && bun run build",
-		"start": "wrangler dev",
-		"test": "vitest",
-		"cf-typegen": "wrangler types"
-	},
-	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.5.2",
-		"@cloudflare/workers-types": "^4.20241018.0",
-		"typescript": "^5.5.2",
-		"vitest": "2.0.5",
-		"wrangler": "^3.60.3"
-	},
-	"dependencies": {
-		"@langchain/cloudflare": "^0.1.0",
-		"hono": "^4.6.5",
-		"langchain": "^0.3.2"
-	}
+    "name": "my-resume",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "deploy": "wrangler deploy",
+        "dev": "wrangler dev",
+        "build": "cd client && bun i && bun run build",
+        "start": "wrangler dev",
+        "test": "vitest",
+        "cf-typegen": "wrangler types"
+    },
+    "devDependencies": {
+        "@cloudflare/vitest-pool-workers": "^0.5.2",
+        "@cloudflare/workers-types": "^4.20241018.0",
+        "typescript": "^5.5.2",
+        "vitest": "2.0.5",
+        "wrangler": "^3.107.2"
+    },
+    "dependencies": {
+        "@langchain/cloudflare": "^0.1.0",
+        "hono": "^4.6.5",
+        "langchain": "^0.3.2",
+        "tailwindcss": "^4.0.2"
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "printWidth": 80
+    }
 }
