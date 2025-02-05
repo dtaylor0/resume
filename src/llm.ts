@@ -32,20 +32,19 @@ export default async function createRagChain(
         index: vectorIndex,
     });
 
-    const retriever = vectorStore.asRetriever({
-        searchKwargs: { fetchK: 20 },
-    });
+    const retriever = vectorStore.asRetriever();
 
     const prompt =
-        PromptTemplate.fromTemplate(`Please answer questions about Drew's
-resume. You will not give specific estimates on time, age, or any similar
-topic. Respond directly to the final unanswered question in natural language.
+        PromptTemplate.fromTemplate(`Your job is to answer questions about Drew's
+resume. You will only answer the question using the given context from the resume.
+(Respond in a conversational manner.)
 
-{context}
 
 Question: {question}
 
-Answer:`);
+
+Context: {context}
+`);
 
     return RunnableSequence.from([
         {

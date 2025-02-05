@@ -69,7 +69,7 @@ function Chat() {
             if (ws.current && ws.current.readyState === WebSocket.OPEN) {
                 ws.current.send(
                     JSON.stringify({
-                        prompt: [...messages, prompt],
+                        prompt: [prompt],
                     }),
                 );
 
