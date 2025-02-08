@@ -16,12 +16,12 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.get("/apiv1/hello", (c) => {
-    return c.json({ response: "hello from api" });
+app.get("/api/v1/hello", (c) => {
+    return c.json({ response: "hello there from api" });
 });
 
 app.get(
-    "/apiv1/ws",
+    "/api/v1/ws",
     upgradeWebSocket((c) => {
         return {
             onMessage(event, ws) {
@@ -53,9 +53,9 @@ app.get(
                                         ws.send(msg);
                                     });
                             })
-                            .catch((err: Error) => {
+                            .catch((_err: Error) => {
                                 const msg = JSON.stringify({
-                                    response: err.message,
+                                    response: "Could not invoke llm",
                                 });
                                 console.error(msg);
                                 ws.send(msg);
@@ -75,15 +75,15 @@ app.get(
     }),
 );
 
-app.post("/apiv1/resume", async (c) => {
-    const resume = await c.req.json();
-    const ok = await refreshVectorize(
-        resume.contents,
-        c.env.VECTORIZE,
-        c.env.AI,
-    );
-    return c.json({ ok });
-});
+//app.post("/api/v1/resume", async (c) => {
+//    const resume = await c.req.json();
+//    const ok = await refreshVectorize(
+//        resume.contents,
+//        c.env.VECTORIZE,
+//        c.env.AI,
+//    );
+//    return c.json({ ok });
+//});
 
 function createDocuments(text: string, chunkSize: number) {
     if (text.length < chunkSize) {

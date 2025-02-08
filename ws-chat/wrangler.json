@@ -14,11 +14,7 @@
     },
     "routes": [
         {
-            "pattern": "drtaylor.xyz/api/v1/ws",
-            "zone_name": "drtaylor.xyz"
-        },
-        {
-            "pattern": "drtaylor.xyz/api/v1/ws",
+            "pattern": "drtaylor.xyz/api/*",
             "zone_name": "drtaylor.xyz"
         }
     ],
