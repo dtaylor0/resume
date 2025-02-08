@@ -14,13 +14,16 @@ import { Message } from "./ChatMessage";
 
 function Chat() {
     const [messages, setMessages] = useState(() => {
-        const savedMessages = localStorage.getItem("messages");
+        if (typeof window === "undefined") {
+            return [] as Message[];
+        }
+        const savedMessages = localStorage?.getItem("messages");
         return savedMessages !== null
             ? (JSON.parse(savedMessages) as Message[])
             : ([] as Message[]);
     });
     useEffect(
-        () => localStorage.setItem("messages", JSON.stringify(messages)),
+        () => localStorage?.setItem("messages", JSON.stringify(messages)),
         [messages],
     );
     const textareaRef: MutableRefObject<HTMLTextAreaElement | null> =
@@ -132,7 +135,7 @@ function Chat() {
                     <p className="text-sm md:text-base overflow-hidden">
                         My name is Drew and I am a Software Engineer at
                         Deloitte. I implement cloud solutions for commercial and
-                        federal clients under Deloitte's AI & Engineering
+                        federal clients under the Deloitte AI & Engineering
                         Offering. Please use the chat below to learn more about
                         my work experience.
                     </p>

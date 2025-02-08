@@ -1,5 +1,5 @@
 node_modules
-wrangler.toml
+**/.dev.vars*
 worker-configuration.d.ts
 
 assets/Resume.md
