@@ -36,7 +36,7 @@
     "vectorize": [
         {
             "binding": "VECTORIZE",
-            "index_name": "my-resume-index"
+            "index_name": "ws-chat-index"
         }
     ]
 

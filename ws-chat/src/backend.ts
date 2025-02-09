@@ -75,16 +75,17 @@ app.get(
     }),
 );
 
-//app.post("/api/v1/resume", async (c) => {
-//    const resume = await c.req.json();
-//    const ok = await refreshVectorize(
-//        resume.contents,
-//        c.env.VECTORIZE,
-//        c.env.AI,
-//    );
-//    return c.json({ ok });
-//});
+app.post("/api/v1/resume", async (c) => {
+    const resume = await c.req.json();
+    const ok = await refreshVectorize(
+        resume.contents,
+        c.env.VECTORIZE,
+        c.env.AI,
+    );
+    return c.json({ ok });
+});
 
+/*
 function createDocuments(text: string, chunkSize: number) {
     if (text.length < chunkSize) {
         throw new Error("Chunks cannot be larger than the input");
@@ -107,15 +108,16 @@ function createDocuments(text: string, chunkSize: number) {
     }
     return documents;
 }
+*/
 
 async function refreshVectorize(
     contents: string,
     vect: VectorizeIndex,
     ai: Bindings["AI"],
 ) {
-    const docs = createDocuments(contents, 600);
-    const md_splitter = new MarkdownTextSplitter({ chunkSize: 600 });
-    const splits = await md_splitter.splitDocuments(docs);
+    //const docs = createDocuments(contents, 600);
+    const md_splitter = new MarkdownTextSplitter();
+    const splits = await md_splitter.splitText(contents);
     for (let i = 0; i < splits.length; i++) {
         for (const [k, v] of Object.entries(splits[i])) {
             if (typeof v === "object") {
@@ -132,7 +134,9 @@ async function refreshVectorize(
         index: vect,
     });
 
-    await store.addDocuments(splits);
+    await store.addDocuments(
+        splits.map((pageContent) => new Document({ pageContent })),
+    );
 }
 
 export default app;

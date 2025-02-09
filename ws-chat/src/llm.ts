@@ -20,7 +20,7 @@ export default async function createRagChain(
     cfApiToken: string,
 ): Promise<RunnableSequence<any, string>> {
     const llm = new CloudflareWorkersAI({
-        //model: '@cf/meta/llama-3.1-70b-instruct',
+        model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", // @cf/meta/llama-3.1-70b-instruct
         cloudflareAccountId: cfAcctId,
         cloudflareApiToken: cfApiToken,
     });
