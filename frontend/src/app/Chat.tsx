@@ -2,19 +2,48 @@
 
 import React, { FormEvent, KeyboardEvent, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 import ChatMessage from './ChatMessage';
-import { Message } from './ChatMessage';
+export type Message = {
+    sender: 'client' | 'server';
+    text: string;
+    id: string;
+};
+
+type WebsocketData = {
+    text: string | undefined;
+    id: string;
+};
 
 function Chat() {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => setIsClient(true), []);
+    const [messages, setMessages] = useState([] as Message[]);
+    const updateQueue = useRef([] as WebsocketData[]);
+    const isProcessing = useRef(false);
 
-    const [messages, setMessages] = useState(() => {
-        if (!isClient) {
-            return [] as Message[];
+    const processQueue = () => {
+        if (isProcessing.current || updateQueue.current.length === 0) {
+            return;
         }
-        const savedMessages = localStorage.getItem('messages');
-        return savedMessages !== null ? (JSON.parse(savedMessages) as Message[]) : ([] as Message[]);
-    });
+
+        isProcessing.current = true;
+        const nextUpdate = updateQueue.current.shift()!;
+        setMessages((ms) => {
+            const prevMsg = ms[ms.length - 1];
+            const prevText = prevMsg.text;
+            if (nextUpdate.id === prevMsg.id) {
+                console.log('appending data to existing msg');
+                const newMessages = ms.slice(0, -1);
+                newMessages.push({
+                    id: nextUpdate.id,
+                    sender: 'server',
+                    text: prevText + (nextUpdate.text || ''),
+                });
+                return newMessages;
+            }
+            console.log('no prev, creating new msg');
+            return [...ms, { sender: 'server', text: nextUpdate.text || '', id: nextUpdate.id }];
+        });
+        isProcessing.current = false;
+        processQueue(); // Process the next item in the queue
+    };
 
     useEffect(() => {
         const chatContainer = chatContainerRef.current;
@@ -22,8 +51,10 @@ function Chat() {
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
     }, [messages]);
-
-    useEffect(() => localStorage.setItem('messages', JSON.stringify(messages)), [messages]);
+    const handleNewData = (newData: WebsocketData) => {
+        updateQueue.current.push(newData);
+        processQueue(); // Start/continue processing
+    };
     const textareaRef: MutableRefObject<HTMLTextAreaElement | null> = useRef(null);
     const chatContainerRef: MutableRefObject<HTMLDivElement | null> = useRef(null);
 
@@ -31,9 +62,9 @@ function Chat() {
     useEffect(() => {
         ws.current = new WebSocket('/api/v1/ws');
         ws.current.onmessage = (event) => {
-            const json = JSON.parse(event.data);
+            const json: WebsocketData = JSON.parse(event.data);
             console.log(json);
-            setMessages((ms) => [...ms, { sender: 'server', text: json.response }]);
+            handleNewData(json);
             if (textareaRef.current) {
                 textareaRef.current.focus();
             }
@@ -55,7 +86,8 @@ function Chat() {
             }
             const promptInput = document.getElementById('prompt-input') as HTMLTextAreaElement;
             const prompt = promptInput.value;
-            setMessages((msgs) => [...msgs, { sender: 'client', text: prompt }]);
+            const id = crypto.randomUUID();
+            setMessages((msgs) => [...msgs, { id, sender: 'client', text: prompt }]);
             if (ws.current && ws.current.readyState === WebSocket.OPEN) {
                 ws.current.send(
                     JSON.stringify({
@@ -66,7 +98,7 @@ function Chat() {
                 promptInput!.value = '';
             } else {
                 console.log('WebSocket is not connected');
-                setMessages((msgs) => [...msgs, { sender: 'server', text: 'Not connected to the server.' }]);
+                setMessages((msgs) => [...msgs, { id, sender: 'server', text: 'Not connected to the server.' }]);
             }
         },
         [messages],

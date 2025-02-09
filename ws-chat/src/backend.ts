@@ -8,6 +8,7 @@ import { MarkdownTextSplitter } from "langchain/text_splitter";
 import createRagChain from "./llm.js";
 import { Document } from "@langchain/core/documents";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { randomUUID } from "crypto";
 
 type Bindings = {
     AI: any;
@@ -17,7 +18,7 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.get("/api/v1/hello", (c) => {
-    return c.json({ response: "hello there from api" });
+    return c.json({ text: "hello there from api" });
 });
 
 app.get(
@@ -30,42 +31,42 @@ app.get(
                     const wsReq = JSON.parse(event.data as string);
                     if (!wsReq || !wsReq.prompt) {
                         console.log("No prompt found.");
-                        ws.send(
-                            JSON.stringify({ response: "No prompt provided" }),
-                        );
+                        ws.send(JSON.stringify({ text: "No prompt provided" }));
                     } else {
+                        const id = randomUUID();
                         createRagChain(
                             c.env.VECTORIZE,
                             c.env.AI,
                             c.env.CF_ACCOUNT_ID,
                             c.env.CF_API_TOKEN,
                         )
-                            .then((r: RunnableSequence) => {
-                                r.invoke(JSON.stringify(wsReq.prompt))
-                                    .then((response) =>
-                                        ws.send(JSON.stringify({ response })),
-                                    )
-                                    .catch((e) => {
-                                        const msg = JSON.stringify({
-                                            response: `invoke failure: ${e.message || "unknown error"}`,
-                                        });
-                                        console.log(msg);
-                                        ws.send(msg);
-                                    });
+                            .then((r: RunnableSequence) =>
+                                r.stream(JSON.stringify(wsReq.prompt)),
+                            )
+                            .then(async (res) => {
+                                let done = false;
+                                while (!done) {
+                                    const chunk = await res.next();
+                                    done = chunk.done;
+                                    ws.send(
+                                        JSON.stringify({
+                                            id,
+                                            text: chunk.value,
+                                        }),
+                                    );
+                                }
                             })
-                            .catch((_err: Error) => {
+                            .catch((e) => {
                                 const msg = JSON.stringify({
-                                    response: "Could not invoke llm",
+                                    text: `invoke failure: ${e.message || "unknown error"}`,
                                 });
-                                console.error(msg);
+                                console.log(msg);
                                 ws.send(msg);
                             });
                     }
                 } catch (error) {
                     console.error("Error in WebSocket handler:", error);
-                    ws.send(
-                        JSON.stringify({ response: "Internal server error" }),
-                    );
+                    ws.send(JSON.stringify({ text: "Internal server error" }));
                 }
             },
             onClose: () => {
@@ -85,37 +86,11 @@ app.post("/api/v1/resume", async (c) => {
     return c.json({ ok });
 });
 
-/*
-function createDocuments(text: string, chunkSize: number) {
-    if (text.length < chunkSize) {
-        throw new Error("Chunks cannot be larger than the input");
-    }
-
-    let documents = [];
-    let lastLoaded = 0;
-    while (lastLoaded < text.length - 1) {
-        const start = lastLoaded + 1;
-        let end = start + chunkSize;
-
-        while (end > start && text[end] != " ") {
-            end--;
-        }
-
-        const doc = new Document({ pageContent: text.slice(start, end) });
-        documents.push(doc);
-
-        lastLoaded = end;
-    }
-    return documents;
-}
-*/
-
 async function refreshVectorize(
     contents: string,
     vect: VectorizeIndex,
     ai: Bindings["AI"],
 ) {
-    //const docs = createDocuments(contents, 600);
     const md_splitter = new MarkdownTextSplitter();
     const splits = await md_splitter.splitText(contents);
     for (let i = 0; i < splits.length; i++) {
