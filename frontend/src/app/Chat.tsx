@@ -135,7 +135,7 @@ function Chat() {
                     <p className="overflow-hidden">
                         My name is Drew and I am a Software Engineer at Deloitte. I implement cloud solutions for commercial and federal
                         clients under the Deloitte AI & Engineering Offering. Please use the chat below to learn more about my work
-                        experience.
+                        experience!
                     </p>
                     {messages.map((msg, i) => ChatMessage(msg, i))}
                 </div>
