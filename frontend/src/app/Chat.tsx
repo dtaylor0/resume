@@ -29,7 +29,6 @@ function Chat() {
             const prevMsg = ms[ms.length - 1];
             const prevText = prevMsg.text;
             if (nextUpdate.id === prevMsg.id) {
-                console.log('appending data to existing msg');
                 const newMessages = ms.slice(0, -1);
                 newMessages.push({
                     id: nextUpdate.id,
@@ -38,7 +37,6 @@ function Chat() {
                 });
                 return newMessages;
             }
-            console.log('no prev, creating new msg');
             return [...ms, { sender: 'server', text: nextUpdate.text || '', id: nextUpdate.id }];
         });
         isProcessing.current = false;
@@ -60,7 +58,7 @@ function Chat() {
 
     const ws: MutableRefObject<WebSocket | null> = useRef(null);
     useEffect(() => {
-        ws.current = new WebSocket('/api/v1/ws');
+        ws.current = new WebSocket('https://drtaylor.xyz/api/v1/ws');
         ws.current.onmessage = (event) => {
             const json: WebsocketData = JSON.parse(event.data);
             console.log(json);
@@ -113,31 +111,35 @@ function Chat() {
         },
         [handleSubmit],
     );
+    //<div id="content" className="w-[90%] md:w-[75%] lg:w-1/2 h-[80%] mx-auto my-3 px-3 md:px-12 py-5 rounded-xl bg-altbackground">
     return (
         <>
-            <div className="flex">
-                <h2 className="text-2xl font-bold text-left my-4">About Me</h2>
-                <button
-                    className="p-2 my-auto float-right font-semibold bg-background border-2 border-accent rounded-lg ml-auto h-10"
-                    onClick={() => {
-                        if (confirm('Are you sure you want to erase the current chat history?')) {
-                            setMessages([]);
-                        }
-                    }}
-                >
-                    New Chat
-                </button>
-            </div>
-            <div id="chat" className="h-full rounded-lg mt-3">
-                <div ref={chatContainerRef} className="h-[70%] overflow-y-auto scrollbar-thin">
-                    <p className="text-sm md:text-base overflow-hidden">
+            <div
+                id="content"
+                className="flex flex-col w-[90%] md:w-[75%] lg:w-1/2 h-[80%] mx-auto my-3 px-3 md:px-12 py-5 rounded-xl bg-altbackground"
+            >
+                <div className="flex justify-between py-3 md: py-5">
+                    <h2 className="md:text-2xl font-bold text-left my-1">About Me</h2>
+                    <button
+                        className="px-2 font-semibold bg-background border-2 border-accent rounded-lg"
+                        onClick={() => {
+                            if (confirm('Are you sure you want to erase the current chat history?')) {
+                                setMessages([]);
+                            }
+                        }}
+                    >
+                        New Chat
+                    </button>
+                </div>
+                <div ref={chatContainerRef} className="flex-grow overflow-y-auto scrollbar-thin">
+                    <p className="overflow-hidden">
                         My name is Drew and I am a Software Engineer at Deloitte. I implement cloud solutions for commercial and federal
                         clients under the Deloitte AI & Engineering Offering. Please use the chat below to learn more about my work
                         experience.
                     </p>
                     {messages.map((msg, i) => ChatMessage(msg, i))}
                 </div>
-                <form id="chat-form" className="rounded-lg flex bg-background px-3" onSubmit={handleSubmit}>
+                <form id="chat-form" className="flex-grow-0 align-self-end rounded-lg flex bg-background px-3" onSubmit={handleSubmit}>
                     <textarea
                         id="prompt-input"
                         placeholder="Type your question here..."
@@ -149,7 +151,7 @@ function Chat() {
                         autoFocus
                     ></textarea>
                     <button
-                        className="p-2 m-auto float-right font-semibold bg-altbackground border-2 border-accent rounded-lg ml-auto h-10"
+                        className="p-2 m-auto float-right font-semibold bg-altbackground border-2 border-accent rounded-lg"
                         id="form-button"
                         type="submit"
                     >
