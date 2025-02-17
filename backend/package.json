@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "deploy": "wrangler deploy",
-        "dev": "wrangler dev",
+        "dev": "wrangler dev --experimental-vectorize-bind-to-prod",
         "build": "cd client && bun i && bun run build",
         "start": "wrangler dev",
         "test": "vitest",
