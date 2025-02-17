@@ -13,6 +13,13 @@ type WebsocketData = {
     id: string;
 };
 
+let WS_HOST = 'https://drtaylor.xyz/api/v1/ws';
+let WS_PORT = 22;
+if (process.env.NODE_ENV === 'development') {
+    WS_HOST = 'http://127.0.0.1';
+    WS_PORT = 8787;
+}
+
 function Chat() {
     const [messages, setMessages] = useState([] as Message[]);
     const updateQueue = useRef([] as WebsocketData[]);
@@ -58,7 +65,7 @@ function Chat() {
 
     const ws: MutableRefObject<WebSocket | null> = useRef(null);
     useEffect(() => {
-        ws.current = new WebSocket('https://drtaylor.xyz/api/v1/ws');
+        ws.current = new WebSocket(`${WS_HOST}:${WS_PORT}`);
         ws.current.onmessage = (event) => {
             const json: WebsocketData = JSON.parse(event.data);
             console.log(json);
