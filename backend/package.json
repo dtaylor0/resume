@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "deploy": "wrangler deploy",
-        "dev": "wrangler dev",
+        "dev": "wrangler dev --experimental-vectorize-bind-to-prod",
         "build": "cd client && bun i && bun run build",
         "start": "wrangler dev",
         "test": "vitest",
@@ -16,7 +16,7 @@
         "@cloudflare/workers-types": "^4.20241018.0",
         "typescript": "^5.5.2",
         "vitest": "2.0.5",
-        "wrangler": "^3.107.2"
+        "wrangler": "^3.109.1"
     },
     "dependencies": {
         "@langchain/cloudflare": "^0.1.0",
