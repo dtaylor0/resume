@@ -3,7 +3,7 @@ import Chat from './Chat';
 
 function App() {
     return (
-        <div className="h-svh flex flex-col text-sm md:text-base">
+        <div className="h-svh flex flex-col text-base">
             <Header />
             <Chat />
         </div>
