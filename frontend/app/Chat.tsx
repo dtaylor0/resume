@@ -105,7 +105,7 @@ function Chat() {
         <>
             <div
                 id="content"
-                className="flex flex-col w-[90%] md:w-[75%] lg:w-1/2 h-[80%] mx-auto my-3 px-3 md:px-12 py-5 rounded-xl bg-altbackground"
+                className="flex flex-col w-[90%] md:w-[75%] lg:w-1/2 h-[50%] md:h-[80%] mx-auto my-3 px-3 md:px-12 py-5 rounded-xl bg-altbackground"
             >
                 <div className="flex justify-between py-3 md:py-5">
                     <h2 className="md:text-2xl font-bold text-left my-1">About Me</h2>
