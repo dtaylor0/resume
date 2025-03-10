@@ -9,6 +9,9 @@
     "compatibility_date": "2024-09-26",
     "compatibility_flags": ["nodejs_compat"],
     "minify": true,
+    "vars": {
+        "WS_HOST": "https://drtaylor.xyz/api/v1/ws"
+    },
     "assets": {
         "binding": "ASSETS",
         "directory": ".open-next/assets"
@@ -22,7 +25,15 @@
             "zone_name": "drtaylor.xyz",
             "custom_domain": true
         }
-    ]
+    ],
+    "env": {
+        "dev": {
+            "workers_dev": true,
+            "vars": {
+                "WS_HOST": "https://resume-backend-dev.drewtaylorm.workers.dev/api/v1/ws"
+            }
+        }
+    }
     /**
      * Smart Placement
      * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

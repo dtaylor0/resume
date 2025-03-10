@@ -22,6 +22,61 @@ app.get("/api/v1/hello", (c) => {
 });
 
 app.get(
+    "/api/v2/ws",
+    upgradeWebSocket((c) => {
+        return {
+            onMessage(event, ws) {
+                console.log(`Message from client: ${event.data}`);
+                try {
+                    const wsReq = JSON.parse(event.data as string);
+                    if (!wsReq || !wsReq.prompt) {
+                        console.log("No prompt found.");
+                        ws.send(JSON.stringify({ text: "No prompt provided" }));
+                    } else {
+                        const id = randomUUID();
+                        createRagChain(
+                            c.env.VECTORIZE,
+                            c.env.AI,
+                            c.env.CF_ACCOUNT_ID,
+                            c.env.CF_API_TOKEN,
+                        )
+                            .then((r: RunnableSequence) =>
+                                r.stream(JSON.stringify(wsReq.prompt)),
+                            )
+                            .then(async (res) => {
+                                let done = false;
+                                while (!done) {
+                                    const chunk = await res.next();
+                                    done = chunk.done;
+                                    const msg = {
+                                        id,
+                                        text: chunk.value,
+                                        done,
+                                    };
+                                    ws.send(JSON.stringify(msg));
+                                }
+                            })
+                            .catch((e) => {
+                                const msg = JSON.stringify({
+                                    text: `invoke failure: ${e.message || "unknown error"}`,
+                                });
+                                console.log(msg);
+                                ws.send(msg);
+                            });
+                    }
+                } catch (error) {
+                    console.error("Error in WebSocket handler:", error);
+                    ws.send(JSON.stringify({ text: "Internal server error" }));
+                }
+            },
+            onClose: () => {
+                console.log("Connection closed");
+            },
+        };
+    }),
+);
+
+app.get(
     "/api/v1/ws",
     upgradeWebSocket((c) => {
         return {
@@ -109,6 +164,11 @@ async function refreshVectorize(
         index: vect,
     });
 
+    splits.forEach((pageContent) =>
+        console.log(
+            `PAGE CONTENT:\n${pageContent}\n--------------------------\n`,
+        ),
+    );
     await store.addDocuments(
         splits.map((pageContent) => new Document({ pageContent })),
     );

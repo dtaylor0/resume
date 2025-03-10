@@ -42,6 +42,7 @@
 
     "env": {
         "dev": {
+            "workers_dev": true,
             "ai": {
                 "binding": "AI"
             },
@@ -49,12 +50,6 @@
                 {
                     "binding": "VECTORIZE",
                     "index_name": "ws-chat-index"
-                }
-            ],
-            "routes": [
-                {
-                    "pattern": "dev.drtaylor.xyz/api/*",
-                    "zone_name": "drtaylor.xyz"
                 }
             ]
         }
