@@ -5,14 +5,20 @@ import {
     CloudflareWorkersAIEmbeddings,
 } from "@langchain/cloudflare";
 import { MarkdownTextSplitter } from "langchain/text_splitter";
-import createRagChain from "./llm.js";
+import streamRagChain from "./llm.js";
 import { Document } from "@langchain/core/documents";
-import { RunnableSequence } from "@langchain/core/runnables";
 import { randomUUID } from "crypto";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
 type Bindings = {
     AI: any;
     VECTORIZE: VectorizeIndex;
+};
+
+type MessageData = {
+    sender: "human" | "ai";
+    text: string;
+    id: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -28,97 +34,55 @@ app.get(
             onMessage(event, ws) {
                 console.log(`Message from client: ${event.data}`);
                 try {
-                    const wsReq = JSON.parse(event.data as string);
-                    if (!wsReq || !wsReq.prompt) {
+                    const wsReq: MessageData[] = JSON.parse(
+                        event.data as string,
+                    );
+                    if (!wsReq) {
                         console.log("No prompt found.");
                         ws.send(JSON.stringify({ text: "No prompt provided" }));
-                    } else {
-                        const id = randomUUID();
-                        createRagChain(
-                            c.env.VECTORIZE,
-                            c.env.AI,
-                            c.env.CF_ACCOUNT_ID,
-                            c.env.CF_API_TOKEN,
-                        )
-                            .then((r: RunnableSequence) =>
-                                r.stream(JSON.stringify(wsReq.prompt)),
-                            )
-                            .then(async (res) => {
-                                let done = false;
-                                while (!done) {
-                                    const chunk = await res.next();
-                                    done = chunk.done;
-                                    const msg = {
-                                        id,
-                                        text: chunk.value,
-                                        done,
-                                    };
-                                    ws.send(JSON.stringify(msg));
-                                }
-                            })
-                            .catch((e) => {
-                                const msg = JSON.stringify({
-                                    text: `invoke failure: ${e.message || "unknown error"}`,
-                                });
-                                console.log(msg);
-                                ws.send(msg);
-                            });
+                        return;
                     }
-                } catch (error) {
-                    console.error("Error in WebSocket handler:", error);
-                    ws.send(JSON.stringify({ text: "Internal server error" }));
-                }
-            },
-            onClose: () => {
-                console.log("Connection closed");
-            },
-        };
-    }),
-);
 
-app.get(
-    "/api/v1/ws",
-    upgradeWebSocket((c) => {
-        return {
-            onMessage(event, ws) {
-                console.log(`Message from client: ${event.data}`);
-                try {
-                    const wsReq = JSON.parse(event.data as string);
-                    if (!wsReq || !wsReq.prompt) {
-                        console.log("No prompt found.");
-                        ws.send(JSON.stringify({ text: "No prompt provided" }));
-                    } else {
-                        const id = randomUUID();
-                        createRagChain(
-                            c.env.VECTORIZE,
-                            c.env.AI,
-                            c.env.CF_ACCOUNT_ID,
-                            c.env.CF_API_TOKEN,
-                        )
-                            .then((r: RunnableSequence) =>
-                                r.stream(JSON.stringify(wsReq.prompt)),
-                            )
-                            .then(async (res) => {
-                                let done = false;
-                                while (!done) {
-                                    const chunk = await res.next();
-                                    done = chunk.done;
-                                    ws.send(
-                                        JSON.stringify({
-                                            id,
-                                            text: chunk.value,
-                                        }),
-                                    );
-                                }
-                            })
-                            .catch((e) => {
-                                const msg = JSON.stringify({
-                                    text: `invoke failure: ${e.message || "unknown error"}`,
-                                });
-                                console.log(msg);
-                                ws.send(msg);
+                    const messages = wsReq.map((m: MessageData) => {
+                        switch (m.sender) {
+                            case "human":
+                                return new HumanMessage(m.text);
+                            case "ai":
+                                return new AIMessage(m.text);
+                            default:
+                                return new HumanMessage(m.text);
+                        }
+                    });
+
+                    const id = randomUUID();
+                    streamRagChain(
+                        c.env.VECTORIZE,
+                        c.env.AI,
+                        c.env.CF_ACCOUNT_ID,
+                        c.env.CF_API_TOKEN,
+                        messages,
+                    )
+                        .then(async (stream) => {
+                            const reader = stream.getReader();
+                            let done = false;
+                            while (!done) {
+                                const chunk = await reader.read();
+                                done = chunk.done;
+                                const msg = {
+                                    id,
+                                    text: chunk.value?.answer,
+                                    done,
+                                };
+                                ws.send(JSON.stringify(msg));
+                            }
+                        })
+                        .catch((e) => {
+                            const msg = JSON.stringify({
+                                text: `invoke failure: ${e.message || "unknown error"}`,
                             });
-                    }
+                            console.log(msg);
+                            ws.send(msg);
+                        });
                 } catch (error) {
                     console.error("Error in WebSocket handler:", error);
                     ws.send(JSON.stringify({ text: "Internal server error" }));

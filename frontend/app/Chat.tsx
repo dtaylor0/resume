@@ -3,7 +3,7 @@
 import React, { FormEvent, KeyboardEvent, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 import Message from './Message';
 export type MessageData = {
-    sender: 'client' | 'server';
+    sender: 'human' | 'ai';
     text: string;
     id: string;
 };
@@ -74,21 +74,19 @@ function Chat() {
             e.preventDefault();
 
             if (canSubmit && ws.current && ws.current.readyState === WebSocket.OPEN) {
+                setCanSubmit(false);
                 const promptInput = document.getElementById('prompt-input') as HTMLTextAreaElement;
                 const prompt = promptInput.value;
                 if (!prompt.trim().length) {
                     return;
                 }
-                const id = crypto.randomUUID();
-                setMessages((msgs) => [...msgs, { id, sender: 'client', text: prompt }]);
-                setCanSubmit(false);
-                ws.current.send(
-                    JSON.stringify({
-                        prompt: [prompt],
-                    }),
-                );
 
                 promptInput!.value = '';
+                const id = crypto.randomUUID();
+                const newMsg: MessageData = { id, sender: 'human', text: prompt };
+                ws.current.send(JSON.stringify([...messages, newMsg]));
+
+                setMessages((msgs) => [...msgs, newMsg]);
             }
         },
         [canSubmit, setCanSubmit],
@@ -174,12 +172,12 @@ function processQueue(
             const newMessages = ms.slice(0, -1);
             newMessages.push({
                 id: nextUpdate.id,
-                sender: 'server',
+                sender: 'ai',
                 text: prevText + (nextUpdate.text || ''),
             });
             return newMessages;
         }
-        return [...ms, { sender: 'server', text: nextUpdate.text || '', id: nextUpdate.id }];
+        return [...ms, { sender: 'ai', text: nextUpdate.text || '', id: nextUpdate.id }];
     });
     isProcessing.current = false;
     processQueue(updateQueue, isProcessing, setMessages); // Process the next item in the queue
