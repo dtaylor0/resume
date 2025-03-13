@@ -128,7 +128,7 @@ function Chat() {
             </div>
             <form 
                 id="chat-form" 
-                className="sticky bottom-0 flex items-end p-3 bg-background border-t border-slate-300 mt-auto h-[64px]" 
+                className="sticky bottom-0 flex items-end p-3 bg-background border-t border-slate-300 mt-auto max-h-[64px] min-h-[40px]" 
                 onSubmit={handleSubmit}
             >
                 <textarea

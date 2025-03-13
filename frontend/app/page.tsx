@@ -5,7 +5,7 @@ import React from 'react';
 
 function App() {
     return (
-        <div className="flex flex-col h-screen text-base">
+        <div className="flex flex-col h-[100dvh] text-base">
             <div id="header-flex" className="flex-shrink-0">
                 <Header />
             </div>
