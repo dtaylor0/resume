@@ -5,11 +5,11 @@ import React from 'react';
 
 function App() {
     return (
-        <div className={`h-svh flex flex-col text-base`}>
-            <div id="header-flex" className="flex-3">
+        <div className="flex flex-col h-screen text-base">
+            <div id="header-flex" className="flex-shrink-0">
                 <Header />
             </div>
-            <div id="chat-flex" className="flex-1">
+            <div id="chat-flex" className="flex-1 overflow-hidden">
                 <Chat />
             </div>
         </div>
