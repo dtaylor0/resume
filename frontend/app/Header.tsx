@@ -6,7 +6,7 @@ function Header() {
                     <div className="text-xl font-bold my-auto text-accent">
                         <a href="/">Drew Taylor</a>
                     </div>
-                    <div className="md:flex space-x-4 text-md">
+                    <div className="md:flex space-x-4 text-base">
                         <a href="https://www.linkedin.com/in/drew-taylor-90b188176/" target="_blank" className="hover:text-accent">
                             LinkedIn
                         </a>

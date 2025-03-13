@@ -107,7 +107,7 @@ function Chat() {
             className="flex flex-col h-full w-[90%] md:w-[75%] lg:w-1/2 p-3 mx-auto bg-altbackground border-x border-slate-400"
         >
             <div className="flex justify-between py-3 md:py-5">
-                <h2 className="md:text-2xl font-bold text-left my-1">About Me</h2>
+                <h2 className="md:text-xl font-bold text-left my-1">About Me</h2>
                 <button
                     className="px-2 font-semibold bg-background border-2 border-accent rounded-lg"
                     onClick={() => {

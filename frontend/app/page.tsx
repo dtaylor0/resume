@@ -5,7 +5,7 @@ import React from 'react';
 
 function App() {
     return (
-        <div className={`h-svh flex flex-col text-sm md:text-base`}>
+        <div className={`h-svh flex flex-col text-base`}>
             <div id="header-flex" className="flex-3">
                 <Header />
             </div>
