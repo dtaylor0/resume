@@ -6,7 +6,7 @@
     --background: #ffffff;
     --altbackground: #ededed;
     --foreground: #171717;
-    --accent: theme("colors.indigo.400");
+    --accent: theme('colors.indigo.400');
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,7 +14,7 @@
         --background: #0a0a0a;
         --altbackground: #171717;
         --foreground: #ededed;
-        --accent: theme("colors.indigo.700");
+        --accent: theme('colors.indigo.700');
     }
 }
 
@@ -39,7 +39,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--accent); /* Thumb color */
+    background-color: var(--background); /* Thumb color */
     border-radius: 6px; /* Rounded thumb */
     border: 3px solid var(--altbackground); /* Creates padding around the thumb */
 }

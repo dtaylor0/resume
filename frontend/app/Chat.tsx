@@ -102,55 +102,52 @@ function Chat() {
         [handleSubmit],
     );
     return (
-        <>
-            <div
-                id="content"
-                className="flex flex-col w-[90%] md:w-[75%] lg:w-1/2 h-[80%] mx-auto my-3 px-3 md:px-12 py-5 rounded-xl bg-altbackground"
-            >
-                <div className="flex justify-between py-3 md:py-5">
-                    <h2 className="md:text-2xl font-bold text-left my-1">About Me</h2>
-                    <button
-                        className="px-2 font-semibold bg-background border-2 border-accent rounded-lg"
-                        onClick={() => {
-                            if (confirm('Are you sure you want to erase the current chat history?')) {
-                                setMessages([]);
-                            }
-                        }}
-                    >
-                        New Chat
-                    </button>
-                </div>
-                <div ref={chatContainerRef} className="flex-grow overflow-y-auto scrollbar-thin">
-                    <p className="overflow-hidden">
-                        My name is Drew and I am a Software Engineer at Deloitte. I implement cloud solutions for commercial and federal
-                        clients under the Deloitte AI & Engineering Offering. Please use the chat below to learn more about my work
-                        experience.
-                    </p>
-                    {messages.map((msg, i) => Message(msg, i))}
-                </div>
-                <form id="chat-form" className="flex-grow-0 align-self-end rounded-lg flex bg-background px-3" onSubmit={handleSubmit}>
-                    <textarea
-                        id="prompt-input"
-                        placeholder="Type your question here..."
-                        className="flex-grow scrollbar-thin rounded-lg bg-inherit focus:outline-none resize-none py-1 px-3 mx-3"
-                        ref={textareaRef}
-                        onKeyDown={handleKeyDown}
-                        inputMode="text"
-                        name="prompt"
-                        autoFocus
-                    ></textarea>
-                    {canSubmit && (
-                        <button
-                            className="p-2 m-auto float-right font-semibold bg-altbackground border-2 border-accent rounded-lg"
-                            id="form-button"
-                            type="submit"
-                        >
-                            Send
-                        </button>
-                    )}
-                </form>
+        <div
+            id="content"
+            className="flex flex-col h-full w-[90%] md:w-[75%] lg:w-1/2 p-3 mx-auto bg-altbackground border-x border-slate-400"
+        >
+            <div className="flex justify-between py-3 md:py-5">
+                <h2 className="md:text-2xl font-bold text-left my-1">About Me</h2>
+                <button
+                    className="px-2 font-semibold bg-background border-2 border-accent rounded-lg"
+                    onClick={() => {
+                        if (confirm('Are you sure you want to erase the current chat history?')) {
+                            setMessages([]);
+                        }
+                    }}
+                >
+                    New Chat
+                </button>
             </div>
-        </>
+            <div ref={chatContainerRef} className="flex-grow overflow-y-auto scrollbar-thin">
+                <p className="overflow-hidden">
+                    My name is Drew and I am a Software Engineer at Deloitte. I implement cloud solutions for commercial and federal clients
+                    under the Deloitte AI & Engineering Offering. Please use the chat below to learn more about my work experience.
+                </p>
+                {messages.map((msg, i) => Message(msg, i))}
+            </div>
+            <form id="chat-form" className="flex-grow-0 align-self-end rounded-lg flex bg-background px-3" onSubmit={handleSubmit}>
+                <textarea
+                    id="prompt-input"
+                    placeholder="Type your question here..."
+                    className="flex-grow scrollbar-thin rounded-lg bg-inherit focus:outline-none resize-none py-1 px-3 mx-3"
+                    ref={textareaRef}
+                    onKeyDown={handleKeyDown}
+                    inputMode="text"
+                    name="prompt"
+                    autoFocus
+                ></textarea>
+                {canSubmit && (
+                    <button
+                        className="p-2 m-auto float-right font-semibold bg-altbackground border-2 border-accent rounded-lg"
+                        id="form-button"
+                        type="submit"
+                    >
+                        Send
+                    </button>
+                )}
+            </form>
+        </div>
     );
 }
 
