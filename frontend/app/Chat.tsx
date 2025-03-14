@@ -18,7 +18,7 @@ type WebsocketData = {
 function useMessagePersistence(initialMessages: MessageData[] = []) {
     const [messages, setMessages] = useState(initialMessages);
     const LOCAL_STORAGE_KEY = 'chat-history';
-    
+
     // Load messages from localStorage
     useEffect(() => {
         try {
@@ -98,9 +98,11 @@ function ChatHeader({ onNewChat, messageCount = 0 }: { onNewChat: () => void; me
     return (
         <div className="flex justify-between items-center p-3 md:p-4 border-b border-slate-300">
             <div className="flex flex-col">
-                <h2 className="md:text-xl font-bold text-left">About Me</h2>
+                <h2 className="md:text-xl font-bold text-left my-auto">About Me</h2>
                 {messageCount > 0 && (
-                    <p className="text-xs text-gray-500">{messageCount} message{messageCount !== 1 ? 's' : ''} in conversation</p>
+                    <p className="text-xs text-gray-500">
+                        {messageCount} message{messageCount !== 1 ? 's' : ''} in conversation
+                    </p>
                 )}
             </div>
             <button
@@ -132,7 +134,9 @@ function MessageList({
                 My name is Drew and I am a Software Engineer at Deloitte. I implement cloud solutions for commercial and federal clients
                 under the Deloitte AI & Engineering Offering. Please use the chat below to learn more about my work experience.
             </p>
-            {messages.map((msg) => <Message key={msg.id} {...msg} />)}
+            {messages.map((msg) => (
+                <Message key={msg.id} {...msg} />
+            ))}
         </div>
     );
 }
@@ -207,25 +211,25 @@ function Chat() {
 
     // Configure WebSocket with connection status tracking
     const ws = useRef<WebSocket | null>(null);
-    
+
     useEffect(() => {
         ws.current = new WebSocket(WS_HOST);
-        
+
         ws.current.onopen = () => {
             console.log('WebSocket connected');
             setIsConnected(true);
         };
-        
+
         ws.current.onclose = () => {
             console.log('WebSocket disconnected');
             setIsConnected(false);
         };
-        
+
         ws.current.onerror = (error) => {
             console.error('WebSocket error:', error);
             setIsConnected(false);
         };
-        
+
         ws.current.onmessage = (event) => {
             const json: WebsocketData = JSON.parse(event.data);
             handleNewData(json);
@@ -258,7 +262,7 @@ function Chat() {
                 promptInput.value = '';
                 const id = crypto.randomUUID();
                 const newMsg: MessageData = { id, sender: 'human', text: prompt };
-                
+
                 // Limit history sent to backend to prevent context overflow
                 const historyToSend = [...messages, newMsg].slice(-MAX_HISTORY_LENGTH);
                 ws.current.send(JSON.stringify(historyToSend));
@@ -292,10 +296,10 @@ function Chat() {
         >
             <ChatHeader onNewChat={handleNewChat} messageCount={messages.length} />
             <MessageList messages={messages} chatContainerRef={chatContainerRef} />
-            <ChatForm 
-                onSubmit={handleSubmit} 
-                canSubmit={canSubmit && isConnected} 
-                textareaRef={textareaRef} 
+            <ChatForm
+                onSubmit={handleSubmit}
+                canSubmit={canSubmit && isConnected}
+                textareaRef={textareaRef}
                 handleKeyDown={handleKeyDown}
             />
             {!isConnected && (
