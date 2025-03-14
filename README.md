@@ -10,8 +10,7 @@ language questions about my work experience.
 The website was previously built using a Go web server, a Python backend
 server for the RAG + LLM, and docker compose to orchestrate. However, I
 recently did a rewrite to React and Hono for Cloudflare Workers in order to
-save cost on LLM tokens and avoid the AWS monthly charge for IPv4 addresses
-(wtf).
+save cost on LLM tokens and avoid the AWS monthly charge for IPv4 addresses.
 
 ## Lessons Learned
 
