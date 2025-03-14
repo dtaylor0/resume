@@ -43,11 +43,26 @@ export default async function streamRagChain(
 
     const retriever = vectorStore.asRetriever();
 
-    const systemPrompt = `Your job is to answer questions about Drew's resume. You will only answer the question using the given context from the resume. Respond in a conversational manner. Context: {context}`;
-    const prompt = ChatPromptTemplate.fromMessages([
-        ["system", systemPrompt],
-        ["user", "{input}"],
-    ]);
+    const systemPrompt = `Your job is to answer questions about Drew's resume. You will only answer the question using the given context from the resume. Respond in a conversational manner. Maintain a friendly, helpful tone throughout the conversation. Context: {context}`;
+    
+    // Build messages array with system prompt first, then all message history
+    const promptMessages = [["system", systemPrompt]];
+    
+    // Add all previous messages from the conversation history (excluding the latest one)
+    if (msgs.length > 1) {
+        for (let i = 0; i < msgs.length - 1; i++) {
+            const msg = msgs[i];
+            promptMessages.push([
+                msg instanceof HumanMessage ? "user" : "assistant", 
+                msg.content as string
+            ]);
+        }
+    }
+    
+    // Add the current user question
+    promptMessages.push(["user", "{input}"]);
+    
+    const prompt = ChatPromptTemplate.fromMessages(promptMessages);
 
     const documentChain = await createStuffDocumentsChain({
         llm,
@@ -75,8 +90,11 @@ export default async function streamRagChain(
         retriever: retrieverChain,
     });
 
+    // Get latest message for input
+    const latestMessage = msgs[msgs.length - 1];
+
     const stream = await retrievalChain.stream({
-        input: msgs[msgs.length - 1].content as string,
+        input: latestMessage.content as string,
         messages: msgs,
     });
 

@@ -17,16 +17,28 @@ type WebsocketData = {
 
 function useMessagePersistence(initialMessages: MessageData[] = []) {
     const [messages, setMessages] = useState(initialMessages);
-
+    const LOCAL_STORAGE_KEY = 'chat-history';
+    
+    // Load messages from localStorage
     useEffect(() => {
-        const storedMsgs = localStorage.getItem('messages');
-        if (storedMsgs) {
-            setMessages(JSON.parse(storedMsgs));
+        try {
+            const storedMsgs = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedMsgs) {
+                const parsedMessages = JSON.parse(storedMsgs);
+                if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+                    setMessages(parsedMessages);
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load chat history:', e);
+            // If parsing fails, clear localStorage
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
     }, []);
 
+    // Save messages to localStorage whenever they change
     useEffect(() => {
-        localStorage.setItem('messages', JSON.stringify(messages));
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
     }, [messages]);
 
     return [messages, setMessages] as const;
@@ -39,29 +51,6 @@ function useScrollToBottom(ref: MutableRefObject<HTMLElement | null>, dependency
             element.scrollTop = element.scrollHeight;
         }
     }, [dependency, ref]);
-}
-
-function useWebSocket(wsHost: string, onMessage: (data: WebsocketData) => void, textareaRef: MutableRefObject<HTMLTextAreaElement | null>) {
-    const ws = useRef<WebSocket | null>(null);
-
-    useEffect(() => {
-        ws.current = new WebSocket(wsHost);
-        ws.current.onmessage = (event) => {
-            const json: WebsocketData = JSON.parse(event.data);
-            onMessage(json);
-            if (textareaRef.current) {
-                textareaRef.current.focus();
-            }
-        };
-
-        return () => {
-            if (ws.current) {
-                ws.current.close();
-            }
-        };
-    }, [wsHost, onMessage, textareaRef]);
-
-    return ws;
 }
 
 function useMessageQueue(setMessages: React.Dispatch<React.SetStateAction<MessageData[]>>) {
@@ -105,17 +94,24 @@ function useMessageQueue(setMessages: React.Dispatch<React.SetStateAction<Messag
     return { addToQueue, updateQueue, isProcessing };
 }
 
-function ChatHeader({ onNewChat }: { onNewChat: () => void }) {
+function ChatHeader({ onNewChat, messageCount = 0 }: { onNewChat: () => void; messageCount?: number }) {
     return (
-        <div className="flex justify-between p-3 md:p-4 border-b border-slate-300">
-            <h2 className="md:text-xl font-bold text-left">About Me</h2>
+        <div className="flex justify-between items-center p-3 md:p-4 border-b border-slate-300">
+            <div className="flex flex-col">
+                <h2 className="md:text-xl font-bold text-left">About Me</h2>
+                {messageCount > 0 && (
+                    <p className="text-xs text-gray-500">{messageCount} message{messageCount !== 1 ? 's' : ''} in conversation</p>
+                )}
+            </div>
             <button
-                className="px-2 py-1 font-semibold bg-background border-2 border-accent rounded-lg"
+                className="px-2 py-1 font-semibold bg-background border-2 border-accent rounded-lg hover:bg-accent hover:text-white transition-colors"
                 onClick={() => {
                     if (confirm('Are you sure you want to erase the current chat history?')) {
                         onNewChat();
                     }
                 }}
+                aria-label="Start a new chat"
+                title="Erase current chat history and start a new conversation"
             >
                 New Chat
             </button>
@@ -192,10 +188,13 @@ function Chat() {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
     const [canSubmit, setCanSubmit] = useState(true);
+    const [isConnected, setIsConnected] = useState(false);
     const { addToQueue } = useMessageQueue(setMessages);
+    const MAX_HISTORY_LENGTH = 20; // Limit history to prevent context overflow
 
     useScrollToBottom(chatContainerRef, [messages]);
 
+    // Handle new data from WebSocket
     const handleNewData = useCallback(
         (newData: WebsocketData) => {
             const done = addToQueue(newData);
@@ -206,8 +205,43 @@ function Chat() {
         [addToQueue, setCanSubmit],
     );
 
-    const ws = useWebSocket(WS_HOST, handleNewData, textareaRef);
+    // Configure WebSocket with connection status tracking
+    const ws = useRef<WebSocket | null>(null);
+    
+    useEffect(() => {
+        ws.current = new WebSocket(WS_HOST);
+        
+        ws.current.onopen = () => {
+            console.log('WebSocket connected');
+            setIsConnected(true);
+        };
+        
+        ws.current.onclose = () => {
+            console.log('WebSocket disconnected');
+            setIsConnected(false);
+        };
+        
+        ws.current.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            setIsConnected(false);
+        };
+        
+        ws.current.onmessage = (event) => {
+            const json: WebsocketData = JSON.parse(event.data);
+            handleNewData(json);
+            if (textareaRef.current) {
+                textareaRef.current.focus();
+            }
+        };
 
+        return () => {
+            if (ws.current) {
+                ws.current.close();
+            }
+        };
+    }, [WS_HOST, handleNewData]);
+
+    // Handle chat form submission
     const handleSubmit = useCallback(
         (e: KeyboardEvent | FormEvent) => {
             e.preventDefault();
@@ -215,20 +249,26 @@ function Chat() {
             if (canSubmit && ws.current && ws.current.readyState === WebSocket.OPEN) {
                 setCanSubmit(false);
                 const promptInput = document.getElementById('prompt-input') as HTMLTextAreaElement;
-                const prompt = promptInput.value;
-                if (!prompt.trim().length) {
+                const prompt = promptInput.value?.trim();
+                if (!prompt || prompt.length === 0) {
+                    setCanSubmit(true);
                     return;
                 }
 
-                promptInput!.value = '';
+                promptInput.value = '';
                 const id = crypto.randomUUID();
                 const newMsg: MessageData = { id, sender: 'human', text: prompt };
-                ws.current.send(JSON.stringify([...messages, newMsg]));
+                
+                // Limit history sent to backend to prevent context overflow
+                const historyToSend = [...messages, newMsg].slice(-MAX_HISTORY_LENGTH);
+                ws.current.send(JSON.stringify(historyToSend));
 
                 setMessages((msgs) => [...msgs, newMsg]);
+            } else if (!isConnected) {
+                alert('Connection to server is offline. Please refresh the page and try again.');
             }
         },
-        [canSubmit, messages, ws, setCanSubmit, setMessages],
+        [canSubmit, messages, isConnected, setMessages],
     );
 
     const handleKeyDown = useCallback(
@@ -250,9 +290,19 @@ function Chat() {
             id="content"
             className="flex flex-col h-full w-[95%] md:w-[80%] lg:w-[60%] mx-auto bg-altbackground border-x border-slate-400 overflow-hidden"
         >
-            <ChatHeader onNewChat={handleNewChat} />
+            <ChatHeader onNewChat={handleNewChat} messageCount={messages.length} />
             <MessageList messages={messages} chatContainerRef={chatContainerRef} />
-            <ChatForm onSubmit={handleSubmit} canSubmit={canSubmit} textareaRef={textareaRef} handleKeyDown={handleKeyDown} />
+            <ChatForm 
+                onSubmit={handleSubmit} 
+                canSubmit={canSubmit && isConnected} 
+                textareaRef={textareaRef} 
+                handleKeyDown={handleKeyDown}
+            />
+            {!isConnected && (
+                <div className="text-center text-sm text-red-500 p-1 bg-red-100 border-t border-red-300">
+                    Connection lost. Please refresh the page.
+                </div>
+            )}
         </div>
     );
 }
