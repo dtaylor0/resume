@@ -51,7 +51,8 @@
                     "binding": "VECTORIZE",
                     "index_name": "ws-chat-index"
                 }
-            ]
+            ],
+            "routes": []
         }
     }
 
