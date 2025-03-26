@@ -33,25 +33,13 @@
     "ai": {
         "binding": "AI"
     },
-    "vectorize": [
-        {
-            "binding": "VECTORIZE",
-            "index_name": "ws-chat-index"
-        }
-    ],
 
     "env": {
         "dev": {
             "workers_dev": true,
             "ai": {
                 "binding": "AI"
-            },
-            "vectorize": [
-                {
-                    "binding": "VECTORIZE",
-                    "index_name": "ws-chat-index"
-                }
-            ]
+            }
         }
     }
 

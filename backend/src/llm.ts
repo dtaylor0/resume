@@ -20,7 +20,7 @@ export default async function streamChain(
         cloudflareApiToken: cfApiToken,
     });
 
-    const systemPrompt = `Your job is to answer questions about Drew's resume. You will only answer the question using the given context from the resume. Respond in a conversational manner. Context: ${context}`;
+    const systemPrompt = `Your job is to answer questions about Drew's resume. You will only answer the question using the given context from the resume. Your answer will be short and to the point, and will avoid directly restating the context if possible. Respond in a conversational manner. Context: ${context}`;
     const sysMsg: BaseMessagePromptTemplateLike = ["system", systemPrompt];
     const messages = [sysMsg, ...msgs];
     const prompt = ChatPromptTemplate.fromMessages(messages);
