@@ -13,9 +13,6 @@ function Header() {
                         <a href="https://github.com/dtaylor0/" target="_blank" className="hover:text-accent">
                             GitHub
                         </a>
-                        <a href="mailto:drewtaylorm@gmail.com" target="_blank" className="hover:text-accent">
-                            Email
-                        </a>
                     </div>
                 </div>
             </nav>

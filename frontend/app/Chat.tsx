@@ -108,7 +108,7 @@ function useMessageQueue(setMessages: React.Dispatch<React.SetStateAction<Messag
 function ChatHeader({ onNewChat }: { onNewChat: () => void }) {
     return (
         <div className="flex justify-between p-3 md:p-4 border-b border-slate-300">
-            <h2 className="md:text-xl font-bold text-left">About Me</h2>
+            <h2 className="md:text-xl font-bold text-left my-auto">About Me</h2>
             <button
                 className="px-2 py-1 font-semibold bg-background border-2 border-accent rounded-lg"
                 onClick={() => {
@@ -136,7 +136,9 @@ function MessageList({
                 My name is Drew and I am a Software Engineer at Deloitte. I implement cloud solutions for commercial and federal clients
                 under the Deloitte AI & Engineering Offering. Please use the chat below to learn more about my work experience.
             </p>
-            {messages.map((msg) => <Message key={msg.id} {...msg} />)}
+            {messages.map((msg) => (
+                <Message key={msg.id} {...msg} />
+            ))}
         </div>
     );
 }
