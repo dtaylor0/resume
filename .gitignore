@@ -1,6 +1,7 @@
 node_modules
 **/.dev.vars*
 worker-configuration.d.ts
+.vscode
 
 assets/Resume.md
 assets/upload.ts
