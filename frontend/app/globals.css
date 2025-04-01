@@ -60,3 +60,11 @@ main {
     border-radius: 6px; /* Rounded thumb */
     border: 3px solid theme(colors.alt); /* Creates padding around the thumb */
 }
+
+.dark {
+    ::-webkit-scrollbar-thumb {
+        background-color: theme(colors.darkmain); /* Thumb color */
+        border-radius: 6px; /* Rounded thumb */
+        border: 3px solid theme(colors.darkalt); /* Creates padding around the thumb */
+    }
+}
