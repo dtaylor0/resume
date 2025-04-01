@@ -107,10 +107,10 @@ function useMessageQueue(setMessages: React.Dispatch<React.SetStateAction<Messag
 
 function ChatHeader({ onNewChat }: { onNewChat: () => void }) {
     return (
-        <div className="flex justify-between p-3 md:p-4 border-b border-slate-300">
-            <h2 className="md:text-xl font-bold text-left my-auto">About Me</h2>
+        <div className="flex justify-between p-3 md:p-4">
+            <h2 className="md:text-xl my-auto font-bold text-left">About</h2>
             <button
-                className="px-2 py-1 font-semibold bg-background border-2 border-accent rounded-lg"
+                className="px-3 py-2 font-semibold bg-accent dark:bg-darkaccent rounded-lg"
                 onClick={() => {
                     if (confirm('Are you sure you want to erase the current chat history?')) {
                         onNewChat();
@@ -157,7 +157,7 @@ function ChatForm({
     return (
         <form
             id="chat-form"
-            className="sticky bottom-0 flex items-end p-3 bg-background border-t border-slate-300 mt-auto max-h-[64px] min-h-[40px]"
+            className="sticky bottom-0 flex items-end p-3 m-3 bg-main dark:bg-darkmain rounded-lg mt-auto max-h-[64px] min-h-[40px]"
             onSubmit={onSubmit}
         >
             <textarea
@@ -173,11 +173,7 @@ function ChatForm({
             ></textarea>
             <div className="w-[72px] ml-2 flex items-center justify-center">
                 {canSubmit ? (
-                    <button
-                        className="px-3 py-2 font-semibold bg-altbackground border-2 border-accent rounded-lg"
-                        id="form-button"
-                        type="submit"
-                    >
+                    <button className="px-3 py-2 font-semibold bg-accent dark:bg-darkaccent rounded-lg" id="form-button" type="submit">
                         Send
                     </button>
                 ) : (
@@ -248,10 +244,7 @@ function Chat() {
     }, [setMessages]);
 
     return (
-        <div
-            id="content"
-            className="flex flex-col h-full w-[95%] md:w-[80%] lg:w-[60%] mx-auto bg-altbackground border-x border-slate-400 overflow-hidden"
-        >
+        <div id="content" className="flex flex-col h-full w-[95%] md:w-[80%] lg:w-[60%] mx-auto bg-alt dark:bg-darkalt overflow-hidden">
             <ChatHeader onNewChat={handleNewChat} />
             <MessageList messages={messages} chatContainerRef={chatContainerRef} />
             <ChatForm onSubmit={handleSubmit} canSubmit={canSubmit} textareaRef={textareaRef} handleKeyDown={handleKeyDown} />
